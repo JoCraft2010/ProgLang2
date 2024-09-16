@@ -22,11 +22,15 @@ LANGUAGE_ASM := $(LANGUAGE_TMP_DIR)/main.s
 LANGUAGE_BIN_DIR := language/bin
 LANGUAGE_BIN := $(LANGUAGE_BIN_DIR)/main
 
+MKDIR_P := mkdir -p
 RM_RF := rm -rf
 
 Q = @
 
-all: compiler
+all: fix_missing compiler
+
+fix_missing:
+	$(Q) $(MKDIR_P) $(COMPILER_OBJ_DIR) $(COMPILER_BIN_DIR) $(LANGUAGE_TMP_DIR) $(LANGUAGE_BIN_DIR)
 
 $(COMPILER_OBJ_DIR)/%.o: $(COMPILER_SRC_DIR)/%.cpp | $(COMPILER_OBJ_DIR)
 	$(Q) $(CXX) $(CXXFLAGS) -c -MMD $< -o $@
@@ -41,4 +45,4 @@ compiler: $(COMPILER_OBJ)
 clean:
 	$(Q) $(RM_RF) $(COMPILER_OBJ) $(COMPILER_MMD) $(LANGUAGE_LL) $(LANGUAGE_ASM)
 
-.PHONY: all compiler clean
+.PHONY: all fix_missing compiler clean
