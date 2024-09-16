@@ -1,0 +1,4 @@
+compiler/bin/*
+compiler/obj/*
+language/bin/*
+language/tmp/*
