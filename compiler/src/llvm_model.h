@@ -11,6 +11,14 @@ namespace pl {
     std::string return_type; // Return type of the function (as a llvm primitive e.g. i32)
     std::vector<std::string> contents; // The lines of generated llvm ir
     int cssa; // The index of the current static single assignment i.e. register
+    std::vector<std::string> attrs; // Attributes declared for this method
+  };
+
+  // LLVM Model attributes container (LLVM IR: attributes #69 = { ... })
+  struct LMAttrs {
+    std::vector<std::string> any_attrs; // The normal arguments (e.g. nocallback, willreturn, etc.)
+    std::vector<std::string> plat_attrs = { "\"frame-pointer\"=\"all\"", "\"min-legal-vector-width\"=\"0\"", "\"no-trapping-math\"=\"true\"", "\"stack-protector-buffer-size\"=\"8\"", "\"tune-cpu\"=\"generic\"" }; // The paltform-specific attributes
+    size_t index = 0; // The index of the attrs. Will be generated automatically once registered.
   };
 
   // Class to model the resulting LLVM in a semi-high level way
@@ -19,9 +27,12 @@ namespace pl {
     void register_public_func(LMPublicFunc);
     LMPublicFunc& get_last_registered_public_func();
 
+    size_t register_attrs(LMAttrs);
+
     std::string build_llvm();
   private:
     std::vector<LMPublicFunc> public_funcs;
+    std::vector<LMAttrs> attrs;
   };
 
 }

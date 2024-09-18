@@ -76,7 +76,7 @@ void pl::PTEFunc::debug_tree(int level) {
 }
 
 void pl::PTEFunc::build_llvm(LlvmModel& model) {
-  model.register_public_func(LMPublicFunc{ name, "local", type, { "%1 = alloca i32, align 4", "store i32 0, ptr %1, align 4" }, 2 });
+  model.register_public_func(LMPublicFunc{ name, "local", type, { "%1 = alloca i32, align 4", "store i32 0, ptr %1, align 4" }, 2, { "noinline", "nounwind", "optnone", "sspstrong", "uwtable" } });
   for (std::shared_ptr<PTEBase> e : elements) {
     e -> build_llvm(model);
   }
