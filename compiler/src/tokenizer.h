@@ -17,6 +17,7 @@ namespace pl {
     BR_CLOSE,
     CURL_OPEN,
     CURL_CLOSE,
+    AT,
     // Keywords
     RETURN,
     // Literals
@@ -32,6 +33,7 @@ namespace pl {
     "closing bracket",
     "opening curly bracket",
     "closing curly bracket",
+    "at",
     "return",
     "int literal",
     "int"
@@ -53,6 +55,7 @@ namespace pl {
     bool is_br_close();
     bool is_curl_open();
     bool is_curl_close();
+    bool is_at();
     bool is_return();
     bool is_literal();
     bool is_type();

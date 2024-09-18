@@ -15,6 +15,11 @@ std::vector<pl::Token> pl::PTERoot::parse(std::vector<Token> token_list) {
       token_list = child.parse(token_list);
       elements.push_back(std::make_shared<PTEFunc>(child));
       buf.clear();
+    } else if (buf.size() == 4 && buf.at(0).is_at() && buf.at(1).is_type() && buf.at(2).is_identifier() && buf.at(3).is_br_open()) {
+      PTEFuncDef child(this, buf.at(2).data.at(0), buf.at(1).as_type());
+      token_list = child.parse(token_list);
+      elements.push_back(std::make_shared<PTEFuncDef>(child));
+      buf.clear();
     }
   }
 
@@ -80,6 +85,31 @@ void pl::PTEFunc::build_llvm(LlvmModel& model) {
   for (std::shared_ptr<PTEBase> e : elements) {
     e -> build_llvm(model);
   }
+}
+
+pl::PTEFuncDef::PTEFuncDef(PTEBase* p, std::string n, std::string t) : super(p), name(n), type(t) {}
+
+std::vector<pl::Token> pl::PTEFuncDef::parse(std::vector<Token> token_list) {
+  while (!token_list.at(0).is_br_close()) {
+    token_list.erase(token_list.begin());
+  }
+  token_list.erase(token_list.begin());
+  if (!token_list.at(0).is_semicolon()) {
+    error("Expected semicolon after function signature.\n");
+  }
+  token_list.erase(token_list.begin());
+  return token_list;
+}
+
+void pl::PTEFuncDef::debug_tree(int level) {
+  for (int i = 0; i < level; i++) {
+    debug(" ");
+  }
+  debug("Function signature: " + name + " with type " + type + "\n");
+}
+
+void pl::PTEFuncDef::build_llvm(LlvmModel& model) {
+  model.register_public_func_def(LMPublicFuncDef{ name, type, { } });
 }
 
 pl::PTEVal::PTEVal(PTEBase* p) : super(p) {}

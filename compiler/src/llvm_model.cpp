@@ -8,6 +8,10 @@ pl::LMPublicFunc& pl::LlvmModel::get_last_registered_public_func() {
   return public_funcs.back();
 }
 
+void pl::LlvmModel::register_public_func_def(LMPublicFuncDef f) {
+  public_func_defs.push_back(f);
+}
+
 size_t pl::LlvmModel::register_attrs(LMAttrs a) {
   a.index = attrs.size();
   attrs.push_back(a);
@@ -23,6 +27,12 @@ std::string pl::LlvmModel::build_llvm() {
       s += "\t" + line + "\n";
     }
     s += "}\n";
+  }
+
+  s += "\n";
+
+  for (LMPublicFuncDef& public_func_def : public_func_defs) {
+    s += "declare " + public_func_def.return_type + " @" + public_func_def.name + "() #" + std::to_string(register_attrs(LMAttrs{ public_func_def.attrs })) + "\n";
   }
 
   s += "\n";

@@ -23,6 +23,8 @@ pl::Token pl::Token::from(char ch) {
       return Token{ TokenType::CURL_OPEN, {} };
     case '}':
       return Token{ TokenType::CURL_CLOSE, {} };
+    case '@':
+      return Token{ TokenType::AT, {} };
     default:
       return Token{ TokenType::IDENTIFIER, { std::to_string(ch) } };
   }
@@ -34,6 +36,7 @@ bool pl::Token::is_br_open() { return token_type == BR_OPEN; }
 bool pl::Token::is_br_close() { return token_type == BR_CLOSE; }
 bool pl::Token::is_curl_open() { return token_type == CURL_OPEN; }
 bool pl::Token::is_curl_close() { return token_type == CURL_CLOSE; }
+bool pl::Token::is_at() { return token_type == AT; }
 bool pl::Token::is_return() { return token_type == RETURN; }
 bool pl::Token::is_literal() { return token_type == INT_LIT; }
 bool pl::Token::is_type() { return token_type == I32_T; }
@@ -66,11 +69,11 @@ pl::Tokenizer::Tokenizer(ParamData param_data) {
   std::string buf;
   while (in_file.get(ch)) {
     // Check for terminating characters
-    if (std::string(" \t\n;(){}").find(ch) != std::string::npos) {
+    if (std::string(" \t\n;(){}@").find(ch) != std::string::npos) {
       if (!buf.empty()) {
         token_list.push_back(Token::from(buf));
       }
-      if (std::string(";(){}").find(ch) != std::string::npos) {
+      if (std::string(";(){}@").find(ch) != std::string::npos) {
         token_list.push_back(Token::from(ch));
       }
       buf = "";

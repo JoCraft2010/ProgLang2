@@ -14,6 +14,13 @@ namespace pl {
     std::vector<std::string> attrs; // Attributes declared for this method
   };
 
+  // LLVM Model public function signature container
+  struct LMPublicFuncDef {
+    std::string name; // Name of the function
+    std::string return_type; // Return type of the function (as a llvm primitive e.g. i32)
+    std::vector<std::string> attrs; // Attributes declared for this method
+  };
+
   // LLVM Model attributes container (LLVM IR: attributes #69 = { ... })
   struct LMAttrs {
     std::vector<std::string> any_attrs; // The normal arguments (e.g. nocallback, willreturn, etc.)
@@ -27,11 +34,14 @@ namespace pl {
     void register_public_func(LMPublicFunc);
     LMPublicFunc& get_last_registered_public_func();
 
+    void register_public_func_def(LMPublicFuncDef);
+
     size_t register_attrs(LMAttrs);
 
     std::string build_llvm();
   private:
     std::vector<LMPublicFunc> public_funcs;
+    std::vector<LMPublicFuncDef> public_func_defs;
     std::vector<LMAttrs> attrs;
   };
 

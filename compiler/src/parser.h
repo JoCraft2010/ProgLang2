@@ -54,6 +54,20 @@ namespace pl {
     std::vector<std::shared_ptr<PTEBase>> elements;
   };
 
+  // Class for function declarations i.e. function signatures without implementation
+  class PTEFuncDef : public PTEBase {
+  public:
+    PTEFuncDef(PTEBase*, std::string, std::string);
+    std::vector<Token> parse(std::vector<Token>) override;
+    void debug_tree(int) override;
+    void build_llvm(LlvmModel&) override;
+  private:
+    using super = PTEBase;
+
+    std::string name;
+    std::string type;
+  };
+
   // Base class for values
   class PTEVal : public PTEBase {
   public:
