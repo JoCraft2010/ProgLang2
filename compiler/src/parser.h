@@ -73,8 +73,24 @@ namespace pl {
   public:
     PTEVal(PTEBase*);
     virtual std::string obtain_access(LlvmModel&) = 0;
+
+    static std::shared_ptr<PTEVal> eval(std::vector<Token>&, PTEBase*);
   private:
     using super = PTEBase;
+  };
+
+  // Class for int literals
+  class PTEFuncCall : public PTEVal {
+  public:
+    PTEFuncCall(PTEBase*, std::string);
+    std::string obtain_access(LlvmModel&) override;
+    std::vector<Token> parse(std::vector<Token>) override;
+    void debug_tree(int) override;
+    void build_llvm(LlvmModel&) override;
+  private:
+    using super = PTEVal;
+
+    std::string name;
   };
 
   // Class for int literals
