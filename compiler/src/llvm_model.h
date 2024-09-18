@@ -2,6 +2,8 @@
 
 #include "pch.h"
 
+#include "logger.h"
+
 namespace pl {
 
   // LLVM Model public function container
@@ -37,6 +39,8 @@ namespace pl {
     void register_public_func_def(LMPublicFuncDef);
 
     size_t register_attrs(LMAttrs);
+
+    std::string obtain_function_type(std::string);
 
     std::string build_llvm();
   private:

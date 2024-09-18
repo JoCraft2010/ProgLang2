@@ -140,8 +140,8 @@ std::shared_ptr<pl::PTEVal> pl::PTEVal::eval(std::vector<Token>& token_list, PTE
 pl::PTEFuncCall::PTEFuncCall(PTEBase* p, std::string n) : super(p), name(n) {}
 
 std::string pl::PTEFuncCall::obtain_access(LlvmModel& model) {
-  error("Not implemented.");
-  return "";
+  build_llvm(model);
+  return "%" + std::to_string(model.get_last_registered_public_func().cssa - 1);
 }
 
 std::vector<pl::Token> pl::PTEFuncCall::parse(std::vector<Token> token_list) {
@@ -157,7 +157,7 @@ void pl::PTEFuncCall::debug_tree(int level) {
 
 void pl::PTEFuncCall::build_llvm(LlvmModel& model) {
   LMPublicFunc& func = model.get_last_registered_public_func();
-  func.contents.push_back("call void () @" + name + "()");
+  func.contents.push_back("%" + std::to_string(func.cssa++) + " = call " + model.obtain_function_type(name) + " () @" + name + "()");
 }
 
 pl::PTEIntLit::PTEIntLit(PTEBase* p) : super(p) {}

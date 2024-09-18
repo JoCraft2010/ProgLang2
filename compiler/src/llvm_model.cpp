@@ -18,6 +18,16 @@ size_t pl::LlvmModel::register_attrs(LMAttrs a) {
   return attrs.size() - 1;
 }
 
+std::string pl::LlvmModel::obtain_function_type(std::string name) {
+  for (LMPublicFuncDef& public_func_def : public_func_defs) {
+    if (public_func_def.name == name) {
+      return public_func_def.return_type;
+    }
+  }
+  error("Unknown function.");
+  return "";
+}
+
 std::string pl::LlvmModel::build_llvm() {
   std::string s;
 
