@@ -158,6 +158,29 @@ std::string pl::PTEFuncCall::obtain_access(LlvmModel& model) {
 }
 
 std::vector<pl::Token> pl::PTEFuncCall::parse(std::vector<Token> token_list) {
+  if (token_list.size() == 3) {
+    return { };
+  }
+  token_list.erase(token_list.begin(), token_list.begin() + 2);
+  std::vector<Token> buf;
+  int bracket_index = 0;
+  while (token_list.size() > 0) {
+    if (token_list.front().is_br_open()) { bracket_index++; }
+    else if (token_list.front().is_br_close()) { bracket_index--; }
+    if (token_list.front().is_comma() || bracket_index < 0) {
+      buf.push_back({ SEMICOLON, { } });
+      std::shared_ptr<PTEVal> child = PTEVal::eval(buf, this);
+      if (child == nullptr) {
+        error("Some parameter in a function call is messed up.\n");
+      }
+      elements.push_back(child);
+      buf.clear();
+    }
+    if (!token_list.front().is_comma()) {
+      buf.push_back(token_list.front());
+    }
+    token_list.erase(token_list.begin());
+  }
   return token_list;
 }
 
@@ -166,11 +189,36 @@ void pl::PTEFuncCall::debug_tree(int level) {
     debug(" ");
   }
   debug("Function call: " + name + "\n");
+  for (std::shared_ptr<PTEVal>& e : elements) {
+    e -> debug_tree(level + 1);
+  }
 }
 
 void pl::PTEFuncCall::build_llvm(LlvmModel& model) {
   LMPublicFunc& func = model.get_last_registered_public_func();
-  func.contents.push_back("%" + std::to_string(func.cssa++) + " = call " + model.obtain_function_type(name) + " () @" + name + "()");
+  std::string s = " = call " + model.obtain_function_type(name) + " (";
+  std::vector<LMPublicFuncDef::__params_t> param_types = model.obtain_function_param_types(name);
+  for (size_t i = 0; i < param_types.size(); i++) {
+    s += param_types.at(i).type;
+    if (i < param_types.size() - 1) {
+      s += ", ";
+    }
+  }
+  s += ") @" + name + "(";
+  for (size_t i = 0; i < elements.size(); i++) {
+    s += param_types.at(i).type;
+    for (std::string& flag : param_types.at(i).flags) {
+      s += " " + flag;
+    }
+    s += " ";
+    s += elements.at(i) -> obtain_access(model);
+    if (i < elements.size() - 1) {
+      s += ", ";
+    }
+  }
+  s += ")";
+  s = "%" + std::to_string(func.cssa++) + s;
+  func.contents.push_back(s);
 }
 
 pl::PTEIntLit::PTEIntLit(PTEBase* p) : super(p) {}

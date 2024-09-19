@@ -2,5 +2,6 @@
 @ int putchar(int);
 
 int main() {
-  return getchar();
+  putchar(getchar());
+  return 0;
 }

@@ -92,6 +92,7 @@ namespace pl {
     using super = PTEVal;
 
     std::string name;
+    std::vector<std::shared_ptr<PTEVal>> elements;
   };
 
   // Class for int literals
