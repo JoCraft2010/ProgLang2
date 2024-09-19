@@ -1,4 +1,4 @@
-compiler/bin/*
-compiler/obj/*
-language/bin/*
-language/tmp/*
+compiler/bin
+compiler/obj
+language/bin
+language/tmp
