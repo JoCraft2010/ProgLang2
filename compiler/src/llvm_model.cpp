@@ -42,7 +42,17 @@ std::string pl::LlvmModel::build_llvm() {
   s += "\n";
 
   for (LMPublicFuncDef& public_func_def : public_func_defs) {
-    s += "declare " + public_func_def.return_type + " @" + public_func_def.name + "() #" + std::to_string(register_attrs(LMAttrs{ public_func_def.attrs })) + "\n";
+    s += "declare " + public_func_def.return_type + " @" + public_func_def.name + "(";
+    for (size_t i = 0; i < public_func_def.params.size(); i++) {
+      s += public_func_def.params.at(i).type;
+      for (std::string& flag : public_func_def.params.at(i).flags) {
+        s += " " + flag;
+      }
+      if (i < public_func_def.params.size() - 1) {
+        s += ", ";
+      }
+    }
+    s += ") #" + std::to_string(register_attrs(LMAttrs{ public_func_def.attrs })) + "\n";
   }
 
   s += "\n";

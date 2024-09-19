@@ -95,7 +95,16 @@ pl::PTEFuncDef::PTEFuncDef(PTEBase* p, std::string n, std::string t) : super(p),
 
 std::vector<pl::Token> pl::PTEFuncDef::parse(std::vector<Token> token_list) {
   while (!token_list.at(0).is_br_close()) {
+    if (!token_list.at(0).is_type()) {
+      error("Expected type.\n");
+    }
+    params.push_back(token_list.at(0).as_type());
     token_list.erase(token_list.begin());
+    if (token_list.at(0).is_comma()) {
+      token_list.erase(token_list.begin());
+    } else if (!token_list.at(0).is_br_close()) {
+      error("Expected comma or closing bracket.\n");
+    }
   }
   token_list.erase(token_list.begin());
   if (!token_list.at(0).is_semicolon()) {
@@ -113,7 +122,11 @@ void pl::PTEFuncDef::debug_tree(int level) {
 }
 
 void pl::PTEFuncDef::build_llvm(LlvmModel& model) {
-  model.register_public_func_def(LMPublicFuncDef{ name, type, { } });
+  std::vector<LMPublicFuncDef::__params_t> p;
+  for (std::string& param : params) {
+    p.push_back({ param, { "noundef" } });
+  }
+  model.register_public_func_def(LMPublicFuncDef{ name, type, { }, p });
 }
 
 pl::PTEVal::PTEVal(PTEBase* p) : super(p) {}

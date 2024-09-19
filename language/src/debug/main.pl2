@@ -1,4 +1,5 @@
 @ int getchar();
+@ int putchar(int);
 
 int main() {
   return getchar();

@@ -66,6 +66,7 @@ namespace pl {
 
     std::string name;
     std::string type;
+    std::vector<std::string> params;
   };
 
   // Base class for values

@@ -15,6 +15,8 @@ pl::Token pl::Token::from(char ch) {
   switch (ch) {
     case ';':
       return Token{ TokenType::SEMICOLON, {} };
+    case ',':
+      return Token{ TokenType::COMMA, {} };
     case '(':
       return Token{ TokenType::BR_OPEN, {} };
     case ')':
@@ -32,6 +34,7 @@ pl::Token pl::Token::from(char ch) {
 
 bool pl::Token::is_identifier() { return token_type == IDENTIFIER; }
 bool pl::Token::is_semicolon() { return token_type == SEMICOLON; }
+bool pl::Token::is_comma() { return token_type == COMMA; }
 bool pl::Token::is_br_open() { return token_type == BR_OPEN; }
 bool pl::Token::is_br_close() { return token_type == BR_CLOSE; }
 bool pl::Token::is_curl_open() { return token_type == CURL_OPEN; }
@@ -69,11 +72,11 @@ pl::Tokenizer::Tokenizer(ParamData param_data) {
   std::string buf;
   while (in_file.get(ch)) {
     // Check for terminating characters
-    if (std::string(" \t\n;(){}@").find(ch) != std::string::npos) {
+    if (std::string(" \t\n;,(){}@").find(ch) != std::string::npos) {
       if (!buf.empty()) {
         token_list.push_back(Token::from(buf));
       }
-      if (std::string(";(){}@").find(ch) != std::string::npos) {
+      if (std::string(";,(){}@").find(ch) != std::string::npos) {
         token_list.push_back(Token::from(ch));
       }
       buf = "";

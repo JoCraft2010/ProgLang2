@@ -13,6 +13,7 @@ namespace pl {
     IDENTIFIER, // Data: Name
     // Punctuation
     SEMICOLON,
+    COMMA,
     BR_OPEN,
     BR_CLOSE,
     CURL_OPEN,
@@ -29,6 +30,7 @@ namespace pl {
   const std::string token_type_names[] = {
     "identifier",
     "semicolon",
+    "comma",
     "opening bracket",
     "closing bracket",
     "opening curly bracket",
@@ -51,6 +53,7 @@ namespace pl {
     // Functions for category checking
     bool is_identifier();
     bool is_semicolon();
+    bool is_comma();
     bool is_br_open();
     bool is_br_close();
     bool is_curl_open();

@@ -18,9 +18,16 @@ namespace pl {
 
   // LLVM Model public function signature container
   struct LMPublicFuncDef {
+    // Struct representing a single parameter
+    struct __params_t {
+      std::string type; // Type of the parameter as a llvm primitive
+      std::vector<std::string> flags; // Flags like noundef
+    };
+
     std::string name; // Name of the function
     std::string return_type; // Return type of the function (as a llvm primitive e.g. i32)
     std::vector<std::string> attrs; // Attributes declared for this method
+    std::vector<__params_t> params; // Parameters the function takes
   };
 
   // LLVM Model attributes container (LLVM IR: attributes #69 = { ... })
