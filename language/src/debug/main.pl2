@@ -1,7 +1,10 @@
+@ int printf(char @);
 @ int getchar();
 @ int putchar(int);
 
 int main() {
-  putchar(getchar());
+  printf("Hello, World!\n");
+  printf("Press enter to continue...\n");
+  getchar();
   return 0;
 }

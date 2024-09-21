@@ -109,6 +109,20 @@ namespace pl {
     std::string value;
   };
 
+  // Class for string literals
+  class PTEStrLit : public PTEVal {
+  public:
+    PTEStrLit(PTEBase*);
+    std::string obtain_access(LlvmModel&) override;
+    std::vector<Token> parse(std::vector<Token>) override;
+    void debug_tree(int) override;
+    void build_llvm(LlvmModel&) override;
+  private:
+    using super = PTEVal;
+
+    std::string value;
+  };
+
   // Class for return statements
   class PTEReturn : public PTEBase {
   public:

@@ -98,8 +98,13 @@ std::vector<pl::Token> pl::PTEFuncDef::parse(std::vector<Token> token_list) {
     if (!token_list.at(0).is_type()) {
       error("Expected type.\n");
     }
-    params.push_back(token_list.at(0).as_type());
-    token_list.erase(token_list.begin());
+    if (token_list.at(1).is_at()) {
+      params.push_back(token_list.at(0).as_type() + "*");
+      token_list.erase(token_list.begin(), token_list.begin() + 2);
+    } else {
+      params.push_back(token_list.at(0).as_type());
+      token_list.erase(token_list.begin());
+    }
     if (token_list.at(0).is_comma()) {
       token_list.erase(token_list.begin());
     } else if (!token_list.at(0).is_br_close()) {
@@ -124,7 +129,11 @@ void pl::PTEFuncDef::debug_tree(int level) {
 void pl::PTEFuncDef::build_llvm(LlvmModel& model) {
   std::vector<LMPublicFuncDef::__params_t> p;
   for (std::string& param : params) {
-    p.push_back({ param, { "noundef" } });
+    if (param.back() == '*') {
+      p.push_back({ param, { } });
+    } else {
+      p.push_back({ param, { "noundef" } });
+    }
   }
   model.register_public_func_def(LMPublicFuncDef{ name, type, { }, p });
 }
@@ -137,10 +146,14 @@ std::shared_ptr<pl::PTEVal> pl::PTEVal::eval(std::vector<Token>& token_list, PTE
     buf.push_back(token_list.front());
     token_list.erase(token_list.begin());
   }
-  if (buf.size() == 1 && buf.at(0).is_literal()) {
+  if (buf.size() == 1 && buf.at(0).is_int_lit()) {
     PTEIntLit child(parent);
     child.parse(buf);
     return std::make_shared<PTEIntLit>(child);
+  } else if (buf.size() == 1 && buf.at(0).is_str_lit()) {
+    PTEStrLit child(parent);
+    child.parse(buf);
+    return std::make_shared<PTEStrLit>(child);
   } else if (buf.at(0).is_identifier() && buf.at(1).is_br_open()) {
     PTEFuncCall child(parent, buf.at(0).data.at(0));
     child.parse(buf);
@@ -243,6 +256,32 @@ void pl::PTEIntLit::debug_tree(int level) {
 }
 
 void pl::PTEIntLit::build_llvm(LlvmModel& model) {}
+
+pl::PTEStrLit::PTEStrLit(PTEBase* p) : super(p) {}
+
+std::string pl::PTEStrLit::obtain_access(LlvmModel& model) {
+  LMStringLit lit = model.register_string_lit(value);
+  LMPublicFunc& func = model.get_last_registered_public_func();
+  func.contents.push_back("%" + std::to_string(func.cssa++) + " = getelementptr inbounds [" + std::to_string(lit.size) + " x i8], [" + std::to_string(lit.size) + " x i8]* " + lit.id + ", " + model.get_size_type() + " 0, " + model.get_size_type() + " 0");
+  return "%" + std::to_string(func.cssa - 1);
+}
+
+std::vector<pl::Token> pl::PTEStrLit::parse(std::vector<Token> token_list) {
+  if (token_list.size() != 1 || !token_list.at(0).is_literal()) {
+    error("Too much or invalid data for a string literal. This is a compiler bug.");
+  }
+  value = token_list.at(0).data.at(0);
+  return token_list;
+}
+
+void pl::PTEStrLit::debug_tree(int level) {
+  for (int i = 0; i < level; i++) {
+    debug(" ");
+  }
+  debug("String literal: " + value + "\n");
+}
+
+void pl::PTEStrLit::build_llvm(LlvmModel& model) {}
 
 pl::PTEReturn::PTEReturn(PTEBase* p) : super(p) {}
 

@@ -6,6 +6,13 @@
 
 namespace pl {
 
+  // LLVM Model string literal container
+  struct LMStringLit {
+    std::string data; // The data the string literal holds
+    std::string id; // The ID the string literal is assigned
+    size_t size; // The size (length) the string literal is
+  };
+
   // LLVM Model public function container
   struct LMPublicFunc {
     std::string name; // Name of the function
@@ -40,6 +47,10 @@ namespace pl {
   // Class to model the resulting LLVM in a semi-high level way
   class LlvmModel {
   public:
+    std::string get_size_type();
+
+    LMStringLit& register_string_lit(std::string);
+
     void register_public_func(LMPublicFunc);
     LMPublicFunc& get_last_registered_public_func();
 
@@ -52,6 +63,9 @@ namespace pl {
 
     std::string build_llvm();
   private:
+    const std::string size_type = "i64";
+
+    std::vector<LMStringLit> string_lits;
     std::vector<LMPublicFunc> public_funcs;
     std::vector<LMPublicFuncDef> public_func_defs;
     std::vector<LMAttrs> attrs;

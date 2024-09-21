@@ -23,7 +23,9 @@ namespace pl {
     RETURN,
     // Literals
     INT_LIT, // Data: Value
+    STR_LIT, // Data: Value
     // Primitive types
+    I8_T,
     I32_T
   };
 
@@ -38,6 +40,8 @@ namespace pl {
     "at",
     "return",
     "int literal",
+    "string literal",
+    "char",
     "int"
   };
 
@@ -61,6 +65,8 @@ namespace pl {
     bool is_at();
     bool is_return();
     bool is_literal();
+    bool is_int_lit();
+    bool is_str_lit();
     bool is_type();
 
     // Conversion functions

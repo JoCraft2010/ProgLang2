@@ -3,6 +3,8 @@
 pl::Token pl::Token::from(std::string s) {
   if (s == "return") {
     return Token{ TokenType::RETURN, {} };
+  } if (s == "char") {
+    return Token{ TokenType::I8_T, {} };
   } if (s == "int") {
     return Token{ TokenType::I32_T, {} };
   } if (std::string("1234567890").find(s.at(0)) != std::string::npos) {
@@ -41,11 +43,15 @@ bool pl::Token::is_curl_open() { return token_type == CURL_OPEN; }
 bool pl::Token::is_curl_close() { return token_type == CURL_CLOSE; }
 bool pl::Token::is_at() { return token_type == AT; }
 bool pl::Token::is_return() { return token_type == RETURN; }
-bool pl::Token::is_literal() { return token_type == INT_LIT; }
-bool pl::Token::is_type() { return token_type == I32_T; }
+bool pl::Token::is_literal() { return token_type == INT_LIT || token_type == STR_LIT; }
+bool pl::Token::is_int_lit() { return token_type == INT_LIT; }
+bool pl::Token::is_str_lit() { return token_type == STR_LIT; }
+bool pl::Token::is_type() { return token_type == I8_T || token_type == I32_T; }
 
 std::string pl::Token::as_type() {
   switch (token_type) {
+    case I8_T:
+      return "i8";
     case I32_T:
       return "i32";
     default:
@@ -71,6 +77,16 @@ pl::Tokenizer::Tokenizer(ParamData param_data) {
   char ch;
   std::string buf;
   while (in_file.get(ch)) {
+    // Check for string literals
+    if (buf.size() > 0 && buf.at(0) == '"') {
+      if (ch == '"') {
+        token_list.push_back(Token{ STR_LIT, { buf.substr(1) } });
+        buf = "";
+      } else {
+        buf += ch;
+      }
+      continue;
+    }
     // Check for terminating characters
     if (std::string(" \t\n;,(){}@").find(ch) != std::string::npos) {
       if (!buf.empty()) {
