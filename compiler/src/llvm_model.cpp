@@ -50,23 +50,23 @@ size_t pl::LlvmModel::register_attrs(LMAttrs a) {
   return attrs.size() - 1;
 }
 
-std::string pl::LlvmModel::obtain_function_type(std::string name) {
+std::string pl::LlvmModel::obtain_function_type(std::string name, size_t l, size_t c) {
   for (LMPublicFuncDef& public_func_def : public_func_defs) {
     if (public_func_def.name == name) {
       return public_func_def.return_type;
     }
   }
-  error("Unknown function.");
+  error("Unknown function: " + name, l, c);
   return "";
 }
 
-std::vector<pl::LMPublicFuncDef::__params_t> pl::LlvmModel::obtain_function_param_types(std::string name) {
+std::vector<pl::LMPublicFuncDef::__params_t> pl::LlvmModel::obtain_function_param_types(std::string name, size_t l, size_t c) {
   for (LMPublicFuncDef& public_func_def : public_func_defs) {
     if (public_func_def.name == name) {
       return public_func_def.params;
     }
   }
-  error("Unknown function.");
+  error("Unknown function: " + name, l, c);
   return {};
 }
 

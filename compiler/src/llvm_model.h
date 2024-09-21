@@ -58,8 +58,8 @@ namespace pl {
 
     size_t register_attrs(LMAttrs);
 
-    std::string obtain_function_type(std::string);
-    std::vector<LMPublicFuncDef::__params_t> obtain_function_param_types(std::string);
+    std::string obtain_function_type(std::string, size_t, size_t);
+    std::vector<LMPublicFuncDef::__params_t> obtain_function_param_types(std::string, size_t, size_t);
 
     std::string build_llvm();
   private:

@@ -28,7 +28,7 @@ int main(int argc, char* argv[]) {
 
   std::ofstream of(param_data.out_path);
   if (!of) {
-    pl::error("Couldn't open output file.\n");
+    pl::error("Couldn't open output file.");
   }
   of << llvm_ir;
   of.close();

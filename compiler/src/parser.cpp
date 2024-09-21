@@ -52,7 +52,7 @@ std::vector<pl::Token> pl::PTEFunc::parse(std::vector<Token> token_list) {
   }
   token_list.erase(token_list.begin());
   if (!token_list.at(0).is_curl_open()) {
-    error("Expected opening curly bracket in function declaration.\n");
+    error("Unexpected " + token_list.at(0).to_string_no_data() + " after function declaration, expected {", token_list.at(0).line, token_list.at(0).character);
   }
   token_list.erase(token_list.begin());
   while (!token_list.at(0).is_curl_close()) {
@@ -97,7 +97,7 @@ pl::PTEFuncDef::PTEFuncDef(PTEBase* p, std::string n, std::string t) : super(p),
 std::vector<pl::Token> pl::PTEFuncDef::parse(std::vector<Token> token_list) {
   while (!token_list.at(0).is_br_close()) {
     if (!token_list.at(0).is_type()) {
-      error("Expected type.\n");
+      error("Unexpected " + token_list.at(0).to_string_no_data() + " in function declaration, expected type", token_list.at(0).line, token_list.at(0).character);
     }
     if (token_list.at(1).is_at()) {
       params.push_back(token_list.at(0).as_type() + "*");
@@ -109,12 +109,12 @@ std::vector<pl::Token> pl::PTEFuncDef::parse(std::vector<Token> token_list) {
     if (token_list.at(0).is_comma()) {
       token_list.erase(token_list.begin());
     } else if (!token_list.at(0).is_br_close()) {
-      error("Expected comma or closing bracket.\n");
+      error("Unexpected " + token_list.at(0).to_string_no_data() + " in function declaration, expected comma or )", token_list.at(0).line, token_list.at(0).character);
     }
   }
   token_list.erase(token_list.begin());
   if (!token_list.at(0).is_semicolon()) {
-    error("Expected semicolon after function signature.\n");
+    error("Expected semicolon after function signature, got " + token_list.at(0).to_string_no_data() + " instead", token_list.at(0).line, token_list.at(0).character);
   }
   token_list.erase(token_list.begin());
   return token_list;
@@ -172,6 +172,8 @@ std::string pl::PTEFuncCall::obtain_access(LlvmModel& model) {
 }
 
 std::vector<pl::Token> pl::PTEFuncCall::parse(std::vector<Token> token_list) {
+  line = token_list.at(0).line;
+  character = token_list.at(0).character;
   if (token_list.size() == 3) {
     return { };
   }
@@ -183,9 +185,10 @@ std::vector<pl::Token> pl::PTEFuncCall::parse(std::vector<Token> token_list) {
     else if (token_list.front().is_br_close()) { bracket_index--; }
     if (token_list.front().is_comma() || bracket_index < 0) {
       buf.push_back({ SEMICOLON, { }, 0, 0 });
+      Token first = buf.at(0);
       std::shared_ptr<PTEVal> child = PTEVal::eval(buf, this);
       if (child == nullptr) {
-        error("Some parameter in a function call is messed up.\n");
+        error("Unexpected " + first.to_string_no_data() + " in function parameter", first.line, first.character);
       }
       elements.push_back(child);
       buf.clear();
@@ -210,8 +213,8 @@ void pl::PTEFuncCall::debug_tree(int level) {
 
 void pl::PTEFuncCall::build_llvm(LlvmModel& model) {
   LMPublicFunc& func = model.get_last_registered_public_func();
-  std::string s = " = call " + model.obtain_function_type(name) + " (";
-  std::vector<LMPublicFuncDef::__params_t> param_types = model.obtain_function_param_types(name);
+  std::string s = " = call " + model.obtain_function_type(name, line, character) + " (";
+  std::vector<LMPublicFuncDef::__params_t> param_types = model.obtain_function_param_types(name, line, character);
   for (size_t i = 0; i < param_types.size(); i++) {
     s += param_types.at(i).type;
     if (i < param_types.size() - 1) {
@@ -243,7 +246,7 @@ std::string pl::PTEIntLit::obtain_access(LlvmModel& model) {
 
 std::vector<pl::Token> pl::PTEIntLit::parse(std::vector<Token> token_list) {
   if (token_list.size() != 1 || !token_list.at(0).is_literal()) {
-    error("Too much or invalid data for an int literal. This is a compiler bug.");
+    error("Compiler bug: (" + std::string{ __FILE__ } + ":" + std::to_string(__LINE__) + ")", token_list.at(0).line, token_list.at(0).character);
   }
   value = token_list.at(0).data.at(0);
   return token_list;
@@ -269,7 +272,7 @@ std::string pl::PTEStrLit::obtain_access(LlvmModel& model) {
 
 std::vector<pl::Token> pl::PTEStrLit::parse(std::vector<Token> token_list) {
   if (token_list.size() != 1 || !token_list.at(0).is_literal()) {
-    error("Too much or invalid data for a string literal. This is a compiler bug.");
+    error("Compiler bug: (" + std::string{ __FILE__ } + ":" + std::to_string(__LINE__) + ")", token_list.at(0).line, token_list.at(0).character);
   }
   value = token_list.at(0).data.at(0);
   return token_list;
@@ -287,9 +290,10 @@ void pl::PTEStrLit::build_llvm(LlvmModel& model) {}
 pl::PTEReturn::PTEReturn(PTEBase* p) : super(p) {}
 
 std::vector<pl::Token> pl::PTEReturn::parse(std::vector<Token> token_list) {
+  Token first = token_list.at(0);
   std::shared_ptr<PTEVal> child = PTEVal::eval(token_list, this);
   if (child == nullptr) {
-    error("Unexpected stuff in return statement.");
+    error("Unexpected " + first.to_string_no_data() + " in return statement", first.line, first.character);
   }
   value = child;
   return token_list;

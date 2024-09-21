@@ -18,10 +18,10 @@ pl::ParamData pl::ParamData::build(int argc, char* argv[]) {
   }
 
   if (!std::filesystem::exists(param_data.in_path)) {
-    error("Input file does not exist.\n");
+    error("Input file does not exist.");
   }
   if (param_data.out_path.empty()) {
-    error("Output file not specified.\n");
+    error("Output file not specified.");
   }
 
   return param_data;

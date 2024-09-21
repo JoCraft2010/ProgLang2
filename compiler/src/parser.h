@@ -91,6 +91,9 @@ namespace pl {
   private:
     using super = PTEVal;
 
+    size_t line;
+    size_t character;
+
     std::string name;
     std::vector<std::shared_ptr<PTEVal>> elements;
   };

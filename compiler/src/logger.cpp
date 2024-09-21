@@ -8,9 +8,8 @@ void pl::info(std::string msg) {
   std::cout << msg << std::flush;
 }
 
-[[deprecated]]
 void pl::error(std::string msg) {
-  std::cerr << "\x1b[1;31m" << msg << "\x1b[0m" << std::flush;
+  std::cerr << "\x1b[1;31mError: \x1b[39m" << msg << "\x1b[0m\n" << std::flush;
   exit(1);
 }
 

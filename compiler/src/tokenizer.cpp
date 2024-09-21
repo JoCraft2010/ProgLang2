@@ -75,7 +75,7 @@ pl::Tokenizer::Tokenizer(ParamData param_data) {
   std::ifstream in_file(param_data.in_path);
 
   if (!in_file.is_open()) {
-    error("Input file couldn't be opened.\n");
+    error("Input file couldn't be opened.");
   }
 
   char ch;
@@ -104,7 +104,11 @@ pl::Tokenizer::Tokenizer(ParamData param_data) {
     // Check for terminating characters
     if (std::string(" \t\n;,(){}@").find(ch) != std::string::npos) {
       if (!buf.empty()) {
-        token_list.push_back(Token::from(buf, line, character));
+        if (ch == '\n') {
+          token_list.push_back(Token::from(buf, line, character));
+        } else {
+          token_list.push_back(Token::from(buf, line + 1, character));
+        }
       }
       if (std::string(";,(){}@").find(ch) != std::string::npos) {
         token_list.push_back(Token::from(ch, line, character));

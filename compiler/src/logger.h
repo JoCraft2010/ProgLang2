@@ -10,11 +10,10 @@ namespace pl {
   // Outputs non-verbose output info and flushes the buffer
   void info(std::string msg);
 
-  // Outputs a non-verbose error and flushes the buffer
-  [[deprecated]]
+  // Outputs a non-verbose error, flushes the buffer and exits with code 1
   void error(std::string msg);
 
-  // Outputs a non-verbose error including position of occurance and flushes the buffer
+  // Outputs a non-verbose error including position of occurance, flushes the buffer and exits with code 1
   void error(std::string msg, size_t line, size_t character);
 
 }
