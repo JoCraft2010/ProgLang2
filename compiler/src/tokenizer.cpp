@@ -1,36 +1,36 @@
 #include "tokenizer.h"
 
-pl::Token pl::Token::from(std::string s) {
+pl::Token pl::Token::from(std::string s, size_t l, size_t c) {
   if (s == "return") {
-    return Token{ TokenType::RETURN, {} };
+    return Token{ TokenType::RETURN, {}, l, c };
   } if (s == "char") {
-    return Token{ TokenType::I8_T, {} };
+    return Token{ TokenType::I8_T, {}, l, c };
   } if (s == "int") {
-    return Token{ TokenType::I32_T, {} };
+    return Token{ TokenType::I32_T, {}, l, c };
   } if (std::string("1234567890").find(s.at(0)) != std::string::npos) {
-    return Token{ TokenType::INT_LIT, { s } };
+    return Token{ TokenType::INT_LIT, { s }, l, c };
   }
-  return Token{ TokenType::IDENTIFIER, { s } };
+  return Token{ TokenType::IDENTIFIER, { s }, l, c };
 }
 
-pl::Token pl::Token::from(char ch) {
+pl::Token pl::Token::from(char ch, size_t l, size_t c) {
   switch (ch) {
     case ';':
-      return Token{ TokenType::SEMICOLON, {} };
+      return Token{ TokenType::SEMICOLON, {}, l, c };
     case ',':
-      return Token{ TokenType::COMMA, {} };
+      return Token{ TokenType::COMMA, {}, l, c };
     case '(':
-      return Token{ TokenType::BR_OPEN, {} };
+      return Token{ TokenType::BR_OPEN, {}, l, c };
     case ')':
-      return Token{ TokenType::BR_CLOSE, {} };
+      return Token{ TokenType::BR_CLOSE, {}, l, c };
     case '{':
-      return Token{ TokenType::CURL_OPEN, {} };
+      return Token{ TokenType::CURL_OPEN, {}, l, c };
     case '}':
-      return Token{ TokenType::CURL_CLOSE, {} };
+      return Token{ TokenType::CURL_CLOSE, {}, l, c };
     case '@':
-      return Token{ TokenType::AT, {} };
+      return Token{ TokenType::AT, {}, l, c };
     default:
-      return Token{ TokenType::IDENTIFIER, { std::to_string(ch) } };
+      return Token{ TokenType::IDENTIFIER, { std::to_string(ch) }, l, c };
   }
 }
 
@@ -67,6 +67,10 @@ std::string pl::Token::to_string() {
   return s;
 }
 
+std::string pl::Token::to_string_no_data() {
+  return token_type_names[token_type];
+}
+
 pl::Tokenizer::Tokenizer(ParamData param_data) {
   std::ifstream in_file(param_data.in_path);
 
@@ -76,24 +80,34 @@ pl::Tokenizer::Tokenizer(ParamData param_data) {
 
   char ch;
   std::string buf;
+  size_t line = 0;
+  size_t character = 0;
   while (in_file.get(ch)) {
+    // Update line and character
+    if (ch == '\n') {
+      line++;
+      character = 0;
+    }
+    character++;
+
     // Check for string literals
     if (buf.size() > 0 && buf.at(0) == '"') {
       if (ch == '"') {
-        token_list.push_back(Token{ STR_LIT, { buf.substr(1) } });
+        token_list.push_back(Token{ STR_LIT, { buf.substr(1) }, line, character });
         buf = "";
       } else {
         buf += ch;
       }
       continue;
     }
+
     // Check for terminating characters
     if (std::string(" \t\n;,(){}@").find(ch) != std::string::npos) {
       if (!buf.empty()) {
-        token_list.push_back(Token::from(buf));
+        token_list.push_back(Token::from(buf, line, character));
       }
       if (std::string(";,(){}@").find(ch) != std::string::npos) {
-        token_list.push_back(Token::from(ch));
+        token_list.push_back(Token::from(ch, line, character));
       }
       buf = "";
     } else {

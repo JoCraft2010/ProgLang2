@@ -49,10 +49,12 @@ namespace pl {
   struct Token {
     TokenType token_type;
     std::vector<std::string> data;
+    size_t line;
+    size_t character;
 
     // Factory functions for Token
-    static Token from(std::string);
-    static Token from(char);
+    static Token from(std::string, size_t, size_t);
+    static Token from(char, size_t, size_t);
 
     // Functions for category checking
     bool is_identifier();
@@ -74,6 +76,7 @@ namespace pl {
 
     // Generation of string name for logging purposes
     std::string to_string();
+    std::string to_string_no_data();
   };
 
   // Class responsible for tokenizing the code

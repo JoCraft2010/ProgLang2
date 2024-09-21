@@ -63,9 +63,10 @@ std::vector<pl::Token> pl::PTEFunc::parse(std::vector<Token> token_list) {
       token_list = child.parse(token_list);
       elements.push_back(std::make_shared<PTEReturn>(child));
     } else {
+      Token first = token_list.at(0);
       std::shared_ptr<PTEVal> child = PTEVal::eval(token_list, this);
       if (child == nullptr) {
-        error("Some evaluation failed inside of a function.\n");
+        error("Unexpected " + first.to_string_no_data(), first.line, first.character);
       }
       elements.push_back(child);
     }
@@ -181,7 +182,7 @@ std::vector<pl::Token> pl::PTEFuncCall::parse(std::vector<Token> token_list) {
     if (token_list.front().is_br_open()) { bracket_index++; }
     else if (token_list.front().is_br_close()) { bracket_index--; }
     if (token_list.front().is_comma() || bracket_index < 0) {
-      buf.push_back({ SEMICOLON, { } });
+      buf.push_back({ SEMICOLON, { }, 0, 0 });
       std::shared_ptr<PTEVal> child = PTEVal::eval(buf, this);
       if (child == nullptr) {
         error("Some parameter in a function call is messed up.\n");

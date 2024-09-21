@@ -3,6 +3,7 @@
 @ int putchar(int);
 
 int main() {
+g
   printf("Hello, World!\n");
   printf("Press enter to continue...\n");
   getchar();
