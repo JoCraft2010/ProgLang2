@@ -29,6 +29,8 @@ pl::Token pl::Token::from(char ch, size_t l, size_t c) {
       return Token{ TokenType::CURL_CLOSE, {}, l, c };
     case '@':
       return Token{ TokenType::AT, {}, l, c };
+    case '~':
+      return Token{ TokenType::TILDE, {}, l, c };
     default:
       return Token{ TokenType::IDENTIFIER, { std::to_string(ch) }, l, c };
   }
@@ -42,6 +44,7 @@ bool pl::Token::is_br_close() { return token_type == BR_CLOSE; }
 bool pl::Token::is_curl_open() { return token_type == CURL_OPEN; }
 bool pl::Token::is_curl_close() { return token_type == CURL_CLOSE; }
 bool pl::Token::is_at() { return token_type == AT; }
+bool pl::Token::is_tilde() { return token_type == TILDE; }
 bool pl::Token::is_return() { return token_type == RETURN; }
 bool pl::Token::is_literal() { return token_type == INT_LIT || token_type == STR_LIT; }
 bool pl::Token::is_int_lit() { return token_type == INT_LIT; }
@@ -50,6 +53,8 @@ bool pl::Token::is_type() { return token_type == I8_T || token_type == I32_T; }
 
 std::string pl::Token::as_type() {
   switch (token_type) {
+    case TILDE:
+      return "...";
     case I8_T:
       return "i8";
     case I32_T:
@@ -102,7 +107,7 @@ pl::Tokenizer::Tokenizer(ParamData param_data) {
     }
 
     // Check for terminating characters
-    if (std::string(" \t\n;,(){}@").find(ch) != std::string::npos) {
+    if (std::string(" \t\n;,(){}@~").find(ch) != std::string::npos) {
       if (!buf.empty()) {
         if (ch == '\n') {
           token_list.push_back(Token::from(buf, line, character));
@@ -110,7 +115,7 @@ pl::Tokenizer::Tokenizer(ParamData param_data) {
           token_list.push_back(Token::from(buf, line + 1, character));
         }
       }
-      if (std::string(";,(){}@").find(ch) != std::string::npos) {
+      if (std::string(";,(){}@~").find(ch) != std::string::npos) {
         token_list.push_back(Token::from(ch, line, character));
       }
       buf = "";

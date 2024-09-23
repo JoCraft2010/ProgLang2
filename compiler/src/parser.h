@@ -74,6 +74,7 @@ namespace pl {
   public:
     PTEVal(PTEBase*);
     virtual std::string obtain_access(LlvmModel&) = 0;
+    virtual std::string obtain_preferred_type(LlvmModel&) = 0;
 
     static std::shared_ptr<PTEVal> eval(std::vector<Token>&, PTEBase*);
   private:
@@ -85,6 +86,7 @@ namespace pl {
   public:
     PTEFuncCall(PTEBase*, std::string);
     std::string obtain_access(LlvmModel&) override;
+    std::string obtain_preferred_type(LlvmModel&) override;
     std::vector<Token> parse(std::vector<Token>) override;
     void debug_tree(int) override;
     void build_llvm(LlvmModel&) override;
@@ -103,6 +105,7 @@ namespace pl {
   public:
     PTEIntLit(PTEBase*);
     std::string obtain_access(LlvmModel&) override;
+    std::string obtain_preferred_type(LlvmModel&) override;
     std::vector<Token> parse(std::vector<Token>) override;
     void debug_tree(int) override;
     void build_llvm(LlvmModel&) override;
@@ -117,6 +120,7 @@ namespace pl {
   public:
     PTEStrLit(PTEBase*);
     std::string obtain_access(LlvmModel&) override;
+    std::string obtain_preferred_type(LlvmModel&) override;
     std::vector<Token> parse(std::vector<Token>) override;
     void debug_tree(int) override;
     void build_llvm(LlvmModel&) override;

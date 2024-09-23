@@ -1,9 +1,9 @@
-@ int printf(char @);
+@ int printf(char @, ~);
 @ int getchar();
 @ int putchar(int);
 
 int main() {
-  printf("Hello, World!\n");
+  printf("Here's a word: %s\nAnd here's a number: %d\n", "yay", 69);
   printf("Press enter to continue...\n");
   getchar();
   return 0;

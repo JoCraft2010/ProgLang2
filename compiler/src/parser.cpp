@@ -96,7 +96,7 @@ pl::PTEFuncDef::PTEFuncDef(PTEBase* p, std::string n, std::string t) : super(p),
 
 std::vector<pl::Token> pl::PTEFuncDef::parse(std::vector<Token> token_list) {
   while (!token_list.at(0).is_br_close()) {
-    if (!token_list.at(0).is_type()) {
+    if ((!token_list.at(0).is_type()) && (!token_list.at(0).is_tilde())) {
       error("Unexpected " + token_list.at(0).to_string_no_data() + " in function declaration, expected type", token_list.at(0).line, token_list.at(0).character);
     }
     if (token_list.at(1).is_at()) {
@@ -130,7 +130,7 @@ void pl::PTEFuncDef::debug_tree(int level) {
 void pl::PTEFuncDef::build_llvm(LlvmModel& model) {
   std::vector<LMPublicFuncDef::__params_t> p;
   for (std::string& param : params) {
-    if (param.back() == '*') {
+    if (param.back() == '*' || param == "...") {
       p.push_back({ param, { } });
     } else {
       p.push_back({ param, { "noundef" } });
@@ -169,6 +169,10 @@ pl::PTEFuncCall::PTEFuncCall(PTEBase* p, std::string n) : super(p), name(n) {}
 std::string pl::PTEFuncCall::obtain_access(LlvmModel& model) {
   build_llvm(model);
   return "%" + std::to_string(model.get_last_registered_public_func().cssa - 1);
+}
+
+std::string pl::PTEFuncCall::obtain_preferred_type(LlvmModel& model) {
+  return model.obtain_function_type(name, line, character);
 }
 
 std::vector<pl::Token> pl::PTEFuncCall::parse(std::vector<Token> token_list) {
@@ -223,9 +227,13 @@ void pl::PTEFuncCall::build_llvm(LlvmModel& model) {
   }
   s += ") @" + name + "(";
   for (size_t i = 0; i < elements.size(); i++) {
-    s += param_types.at(i).type;
-    for (std::string& flag : param_types.at(i).flags) {
-      s += " " + flag;
+    if (i >= param_types.size() || param_types.at(i).type == "...") {
+      s += elements.at(i) -> obtain_preferred_type(model);
+    } else {
+      s += param_types.at(i).type;
+      for (std::string& flag : param_types.at(i).flags) {
+        s += " " + flag;
+      }
     }
     s += " ";
     s += elements.at(i) -> obtain_access(model);
@@ -242,6 +250,10 @@ pl::PTEIntLit::PTEIntLit(PTEBase* p) : super(p) {}
 
 std::string pl::PTEIntLit::obtain_access(LlvmModel& model) {
   return value;
+}
+
+std::string pl::PTEIntLit::obtain_preferred_type(LlvmModel& model) {
+  return "i32";
 }
 
 std::vector<pl::Token> pl::PTEIntLit::parse(std::vector<Token> token_list) {
@@ -268,6 +280,10 @@ std::string pl::PTEStrLit::obtain_access(LlvmModel& model) {
   LMPublicFunc& func = model.get_last_registered_public_func();
   func.contents.push_back("%" + std::to_string(func.cssa++) + " = getelementptr inbounds [" + std::to_string(lit.size) + " x i8], [" + std::to_string(lit.size) + " x i8]* " + lit.id + ", " + model.get_size_type() + " 0, " + model.get_size_type() + " 0");
   return "%" + std::to_string(func.cssa - 1);
+}
+
+std::string pl::PTEStrLit::obtain_preferred_type(LlvmModel& model) {
+  return "i8*";
 }
 
 std::vector<pl::Token> pl::PTEStrLit::parse(std::vector<Token> token_list) {
