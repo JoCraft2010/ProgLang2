@@ -32,6 +32,8 @@ namespace pl {
     std::unordered_map<std::string, size_t> stack_pool_assignments = {}; // Map ordering the assignment of variable name (freeing should be handled by scope PTE element) to stack pool entry
 
     std::string obtain_stack_mem(std::string, int, std::string);
+    std::string get_mem_addr_ptr(std::string);
+    std::string get_variable_type(std::string);
   };
 
   // LLVM Model public function signature container

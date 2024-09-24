@@ -4,7 +4,7 @@
 
 int main() {
   int a = 42;
-  printf("Here's a word: %s\nAnd here's a number: %d\n", "yay", 69);
+  printf("Here's a word: %s\nAnd here's a number: %d\n", "yay", a);
   printf("Press enter to continue...\n");
   getchar();
   return 0;

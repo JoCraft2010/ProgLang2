@@ -164,6 +164,10 @@ std::shared_ptr<pl::PTEVal> pl::PTEVal::eval(std::vector<Token>& token_list, PTE
     PTEStrLit child(parent);
     child.parse(buf);
     return std::make_shared<PTEStrLit>(child);
+  } else if (buf.size() == 1 && buf.at(0).is_identifier()) {
+    PTEVarVal child(parent, buf.at(0).data.at(0));
+    child.parse(buf);
+    return std::make_shared<PTEVarVal>(child);
   } else if (buf.size() >= 3 && buf.at(0).is_identifier() && buf.at(1).is_br_open()) {
     PTEFuncCall child(parent, buf.at(0).data.at(0));
     child.parse(buf);
@@ -254,6 +258,32 @@ void pl::PTEFuncCall::build_llvm(LlvmModel& model) {
   s = "%" + std::to_string(func.cssa++) + s;
   func.contents.push_back(s);
 }
+
+pl::PTEVarVal::PTEVarVal(PTEBase* p, std::string n) : super(p), name(n) {}
+
+std::string pl::PTEVarVal::obtain_access(LlvmModel& model) {
+  LMPublicFunc& func = model.get_last_registered_public_func();
+  std::string type = obtain_preferred_type(model);
+  func.contents.push_back("%" + std::to_string(func.cssa++) + " = load " + type + ", " + type + "* " + func.get_mem_addr_ptr(name));
+  return "%" + std::to_string(func.cssa - 1);
+}
+
+std::string pl::PTEVarVal::obtain_preferred_type(LlvmModel& model) {
+  return model.get_last_registered_public_func().get_variable_type(name);
+}
+
+std::vector<pl::Token> pl::PTEVarVal::parse(std::vector<Token> token_list) {
+  return token_list;
+}
+
+void pl::PTEVarVal::debug_tree(int level) {
+  for (int i = 0; i < level; i++) {
+    debug(" ");
+  }
+  debug("Variable value: " + name + "\n");
+}
+
+void pl::PTEVarVal::build_llvm(LlvmModel& model) {}
 
 pl::PTEIntLit::PTEIntLit(PTEBase* p) : super(p) {}
 

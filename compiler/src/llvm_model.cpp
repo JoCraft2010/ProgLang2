@@ -6,6 +6,14 @@ std::string pl::LMPublicFunc::obtain_stack_mem(std::string t, int a, std::string
   return stack_pool.back().name;
 }
 
+std::string pl::LMPublicFunc::get_mem_addr_ptr(std::string n) {
+  return stack_pool.at(stack_pool_assignments.at(n)).name;
+}
+
+std::string pl::LMPublicFunc::get_variable_type(std::string n) {
+  return stack_pool.at(stack_pool_assignments.at(n)).type;
+}
+
 std::string pl::LlvmModel::get_size_type() {
   return size_type;
 }

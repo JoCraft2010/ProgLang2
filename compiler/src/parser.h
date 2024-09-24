@@ -100,6 +100,24 @@ namespace pl {
     std::vector<std::shared_ptr<PTEVal>> elements;
   };
 
+  // Class for variable values
+  class PTEVarVal : public PTEVal {
+  public:
+    PTEVarVal(PTEBase*, std::string);
+    std::string obtain_access(LlvmModel&) override;
+    std::string obtain_preferred_type(LlvmModel&) override;
+    std::vector<Token> parse(std::vector<Token>) override;
+    void debug_tree(int) override;
+    void build_llvm(LlvmModel&) override;
+  private:
+    using super = PTEVal;
+
+    size_t line;
+    size_t character;
+
+    std::string name;
+  };
+
   // Class for int literals
   class PTEIntLit : public PTEVal {
   public:
