@@ -164,7 +164,7 @@ std::shared_ptr<pl::PTEVal> pl::PTEVal::eval(std::vector<Token>& token_list, PTE
     PTEStrLit child(parent);
     child.parse(buf);
     return std::make_shared<PTEStrLit>(child);
-  } else if (buf.at(0).is_identifier() && buf.at(1).is_br_open()) {
+  } else if (buf.size() >= 3 && buf.at(0).is_identifier() && buf.at(1).is_br_open()) {
     PTEFuncCall child(parent, buf.at(0).data.at(0));
     child.parse(buf);
     return std::make_shared<PTEFuncCall>(child);
