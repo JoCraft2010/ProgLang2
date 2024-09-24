@@ -59,6 +59,11 @@ void pl::LlvmModel::register_public_func_def(LMPublicFuncDef f) {
 }
 
 size_t pl::LlvmModel::register_attrs(LMAttrs a) {
+  for (LMAttrs attr : attrs) {
+    if (attr.any_attrs == a.any_attrs && attr.plat_attrs == a.plat_attrs) {
+      return attr.index;
+    }
+  }
   a.index = attrs.size();
   attrs.push_back(a);
   return attrs.size() - 1;
