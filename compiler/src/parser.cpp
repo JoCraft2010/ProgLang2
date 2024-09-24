@@ -62,6 +62,15 @@ std::vector<pl::Token> pl::PTEFunc::parse(std::vector<Token> token_list) {
       PTEReturn child(this);
       token_list = child.parse(token_list);
       elements.push_back(std::make_shared<PTEReturn>(child));
+    } else if (token_list.at(0).is_type() && token_list.at(1).is_identifier()) {
+      std::string n = token_list.at(1).data.at(0);
+      std::string t = token_list.at(0).as_type();
+      int a = token_list.at(0).as_alignment();
+      token_list.erase(token_list.begin(), token_list.begin() + 2);
+
+      PTELocalVarDecl child(this, n, t, a);
+      token_list = child.parse(token_list);
+      elements.push_back(std::make_shared<PTELocalVarDecl>(child));
     } else {
       Token first = token_list.at(0);
       std::shared_ptr<PTEVal> child = PTEVal::eval(token_list, this);
@@ -326,6 +335,40 @@ void pl::PTEReturn::debug_tree(int level) {
 void pl::PTEReturn::build_llvm(LlvmModel& model) {
   LMPublicFunc& func = model.get_last_registered_public_func();
   func.contents.push_back("ret " + func.return_type + " " + value -> obtain_access(model));
+}
+
+pl::PTELocalVarDecl::PTELocalVarDecl(PTEBase* p, std::string n, std::string t, int a) : super(p), name(n), type(t), alignment(a) {}
+
+std::vector<pl::Token> pl::PTELocalVarDecl::parse(std::vector<Token> token_list) {
+  if (token_list.at(0).is_semicolon()) {
+    return token_list;
+  }
+  if (!token_list.at(0).is_eq()) {
+    error("Unexpected " + token_list.at(0).to_string_no_data() + " in variable declaration, expected = or ;", token_list.at(0).line, token_list.at(0).character);
+  }
+  token_list.erase(token_list.begin());
+  value = PTEVal::eval(token_list, this);
+  return token_list;
+}
+
+void pl::PTELocalVarDecl::debug_tree(int level) {
+  for (int i = 0; i < level; i++) {
+    debug(" ");
+  }
+  debug("Variable declaration: " + type + " " + name + "\n");
+  if (value == std::nullopt) {
+    return;
+  }
+  value.value() -> debug_tree(level + 1);
+}
+
+void pl::PTELocalVarDecl::build_llvm(LlvmModel& model) {
+  LMPublicFunc& func = model.get_last_registered_public_func();
+  std::string mem = func.obtain_stack_mem(type, alignment, name);
+  if (value == std::nullopt) {
+    return;
+  }
+  func.contents.push_back("store " + type + " " + value.value() -> obtain_access(model) + ", " + type + "* " + mem);
 }
 
 pl::Parser::Parser(Preprocessor preprocessor) : root(nullptr) {

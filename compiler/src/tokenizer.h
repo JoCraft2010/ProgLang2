@@ -14,6 +14,7 @@ namespace pl {
     // Punctuation
     SEMICOLON,
     COMMA,
+    EQ,
     BR_OPEN,
     BR_CLOSE,
     CURL_OPEN,
@@ -34,6 +35,7 @@ namespace pl {
     "identifier",
     "semicolon",
     "comma",
+    "equal sign",
     "opening bracket",
     "closing bracket",
     "opening curly bracket",
@@ -62,6 +64,7 @@ namespace pl {
     bool is_identifier();
     bool is_semicolon();
     bool is_comma();
+    bool is_eq();
     bool is_br_open();
     bool is_br_close();
     bool is_curl_open();
@@ -76,6 +79,7 @@ namespace pl {
 
     // Conversion functions
     std::string as_type();
+    int as_alignment();
 
     // Generation of string name for logging purposes
     std::string to_string();

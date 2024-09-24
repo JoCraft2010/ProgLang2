@@ -143,6 +143,22 @@ namespace pl {
     std::shared_ptr<PTEVal> value;
   };
 
+  // Class for return statements
+  class PTELocalVarDecl : public PTEBase {
+  public:
+    PTELocalVarDecl(PTEBase*, std::string, std::string, int);
+    std::vector<Token> parse(std::vector<Token>) override;
+    void debug_tree(int) override;
+    void build_llvm(LlvmModel&) override;
+  private:
+    using super = PTEBase;
+
+    std::string name;
+    std::string type;
+    int alignment;
+    std::optional<std::shared_ptr<PTEVal>> value;
+  };
+
   // Class for parsing the preprocessed tokens
   class Parser {
   public:

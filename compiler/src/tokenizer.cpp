@@ -19,6 +19,8 @@ pl::Token pl::Token::from(char ch, size_t l, size_t c) {
       return Token{ TokenType::SEMICOLON, {}, l, c };
     case ',':
       return Token{ TokenType::COMMA, {}, l, c };
+    case '=':
+      return Token{ TokenType::EQ, {}, l, c };
     case '(':
       return Token{ TokenType::BR_OPEN, {}, l, c };
     case ')':
@@ -39,6 +41,7 @@ pl::Token pl::Token::from(char ch, size_t l, size_t c) {
 bool pl::Token::is_identifier() { return token_type == IDENTIFIER; }
 bool pl::Token::is_semicolon() { return token_type == SEMICOLON; }
 bool pl::Token::is_comma() { return token_type == COMMA; }
+bool pl::Token::is_eq() { return token_type == EQ; }
 bool pl::Token::is_br_open() { return token_type == BR_OPEN; }
 bool pl::Token::is_br_close() { return token_type == BR_CLOSE; }
 bool pl::Token::is_curl_open() { return token_type == CURL_OPEN; }
@@ -61,6 +64,15 @@ std::string pl::Token::as_type() {
       return "i32";
     default:
       return "invalid";
+  }
+}
+
+int pl::Token::as_alignment() {
+  switch (token_type) {
+    case I32_T:
+      return 4;
+    default:
+      return 1;
   }
 }
 
@@ -107,7 +119,7 @@ pl::Tokenizer::Tokenizer(ParamData param_data) {
     }
 
     // Check for terminating characters
-    if (std::string(" \t\n;,(){}@~").find(ch) != std::string::npos) {
+    if (std::string(" \t\n;,=(){}@~").find(ch) != std::string::npos) {
       if (!buf.empty()) {
         if (ch == '\n') {
           token_list.push_back(Token::from(buf, line, character));
@@ -115,7 +127,7 @@ pl::Tokenizer::Tokenizer(ParamData param_data) {
           token_list.push_back(Token::from(buf, line + 1, character));
         }
       }
-      if (std::string(";,(){}@~").find(ch) != std::string::npos) {
+      if (std::string(";,=(){}@~").find(ch) != std::string::npos) {
         token_list.push_back(Token::from(ch, line, character));
       }
       buf = "";

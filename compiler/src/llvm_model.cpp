@@ -1,5 +1,11 @@
 #include "llvm_model.h"
 
+std::string pl::LMPublicFunc::obtain_stack_mem(std::string t, int a, std::string n) {
+  stack_pool_assignments[n] = stack_pool.size();
+  stack_pool.push_back({ t, "%." + std::to_string(stack_pool.size() + 1), a });
+  return stack_pool.back().name;
+}
+
 std::string pl::LlvmModel::get_size_type() {
   return size_type;
 }
@@ -81,6 +87,9 @@ std::string pl::LlvmModel::build_llvm() {
 
   for (LMPublicFunc& public_func : public_funcs) {
     s += "define dso_" + public_func.dso + " " + public_func.return_type + " @" + public_func.name + "() #" + std::to_string(register_attrs(LMAttrs{ public_func.attrs })) + " {\n";
+    for (LMPublicFunc::__stack_ssa_pool_entry stack_pool_entry : public_func.stack_pool) {
+      s += "\t" + stack_pool_entry.name + " = alloca " + stack_pool_entry.type + ", align " + std::to_string(stack_pool_entry.alignment) + "\n";
+    }
     for (std::string& line : public_func.contents) {
       s += "\t" + line + "\n";
     }

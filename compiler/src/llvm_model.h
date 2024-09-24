@@ -15,12 +15,23 @@ namespace pl {
 
   // LLVM Model public function container
   struct LMPublicFunc {
+    // struct representing a single entry in the stack ssa pool for local variables
+    struct __stack_ssa_pool_entry {
+      std::string type; // The type of the entry as a llvm primitive
+      std::string name; // The name of the stack entry (e.g. %42)
+      int alignment; // The alignment of the piece of stack memory
+    };
+
     std::string name; // Name of the function
     std::string dso; // Dynamic shared object type, can be local, preemptable, preemptible and weak
     std::string return_type; // Return type of the function (as a llvm primitive e.g. i32)
     std::vector<std::string> contents; // The lines of generated llvm ir
     int cssa; // The index of the current static single assignment i.e. register
     std::vector<std::string> attrs; // Attributes declared for this method
+    std::vector<__stack_ssa_pool_entry> stack_pool = { }; // Stack pool containing all stack-assigned variables
+    std::unordered_map<std::string, size_t> stack_pool_assignments = {}; // Map ordering the assignment of variable name (freeing should be handled by scope PTE element) to stack pool entry
+
+    std::string obtain_stack_mem(std::string, int, std::string);
   };
 
   // LLVM Model public function signature container
