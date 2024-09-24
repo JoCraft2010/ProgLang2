@@ -1,6 +1,4 @@
-@ int printf(char @, ~);
-@ int getchar();
-@ int putchar(int);
+$include "libfile.pl2"
 
 int main() {
   int a = 42;

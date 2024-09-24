@@ -10,11 +10,9 @@
 int main(int argc, char* argv[]) {
   pl::ParamData param_data = pl::ParamData::build(argc, argv);
 
-  pl::Tokenizer tokenizer(param_data);
+  pl::Tokenizer tokenizer(param_data.in_path);
 
-  pl::Preprocessor preprocessor(tokenizer);
-
-  pl::debug("\n----------\n\n");
+  pl::Preprocessor preprocessor(tokenizer, param_data.in_path.parent_path());
 
   pl::Parser parser(preprocessor);
 

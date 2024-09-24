@@ -403,6 +403,7 @@ void pl::PTELocalVarDecl::build_llvm(LlvmModel& model) {
 
 pl::Parser::Parser(Preprocessor preprocessor) : root(nullptr) {
   root.parse(preprocessor.get_token_list());
+  debug("\n----------\n\n");
   root.debug_tree(0);
 }
 

@@ -1,0 +1,3 @@
+@ int printf(char @, ~);
+@ int getchar();
+@ int putchar(int);

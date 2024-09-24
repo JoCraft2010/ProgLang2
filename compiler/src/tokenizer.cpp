@@ -15,6 +15,8 @@ pl::Token pl::Token::from(std::string s, size_t l, size_t c) {
 
 pl::Token pl::Token::from(char ch, size_t l, size_t c) {
   switch (ch) {
+    case '$':
+      return Token{ TokenType::DOLLAR, {}, l, c };
     case ';':
       return Token{ TokenType::SEMICOLON, {}, l, c };
     case ',':
@@ -39,6 +41,7 @@ pl::Token pl::Token::from(char ch, size_t l, size_t c) {
 }
 
 bool pl::Token::is_identifier() { return token_type == IDENTIFIER; }
+bool pl::Token::is_dollar() { return token_type == DOLLAR; }
 bool pl::Token::is_semicolon() { return token_type == SEMICOLON; }
 bool pl::Token::is_comma() { return token_type == COMMA; }
 bool pl::Token::is_eq() { return token_type == EQ; }
@@ -88,8 +91,8 @@ std::string pl::Token::to_string_no_data() {
   return token_type_names[token_type];
 }
 
-pl::Tokenizer::Tokenizer(ParamData param_data) {
-  std::ifstream in_file(param_data.in_path);
+pl::Tokenizer::Tokenizer(std::filesystem::path ifpath) {
+  std::ifstream in_file(ifpath);
 
   if (!in_file.is_open()) {
     error("Input file couldn't be opened.");
@@ -119,7 +122,7 @@ pl::Tokenizer::Tokenizer(ParamData param_data) {
     }
 
     // Check for terminating characters
-    if (std::string(" \t\n;,=(){}@~").find(ch) != std::string::npos) {
+    if (std::string(" \t\n$;,=(){}@~").find(ch) != std::string::npos) {
       if (!buf.empty()) {
         if (ch == '\n') {
           token_list.push_back(Token::from(buf, line, character));
@@ -127,7 +130,7 @@ pl::Tokenizer::Tokenizer(ParamData param_data) {
           token_list.push_back(Token::from(buf, line + 1, character));
         }
       }
-      if (std::string(";,=(){}@~").find(ch) != std::string::npos) {
+      if (std::string("$;,=(){}@~").find(ch) != std::string::npos) {
         token_list.push_back(Token::from(ch, line, character));
       }
       buf = "";

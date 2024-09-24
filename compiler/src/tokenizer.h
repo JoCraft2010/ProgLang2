@@ -12,6 +12,7 @@ namespace pl {
     // Identifier
     IDENTIFIER, // Data: Name
     // Punctuation
+    DOLLAR,
     SEMICOLON,
     COMMA,
     EQ,
@@ -33,6 +34,7 @@ namespace pl {
 
   const std::string token_type_names[] = {
     "identifier",
+    "dollar (preprocessor directive)",
     "semicolon",
     "comma",
     "equal sign",
@@ -62,6 +64,7 @@ namespace pl {
 
     // Functions for category checking
     bool is_identifier();
+    bool is_dollar();
     bool is_semicolon();
     bool is_comma();
     bool is_eq();
@@ -89,7 +92,7 @@ namespace pl {
   // Class responsible for tokenizing the code
   class Tokenizer {
   public:
-    Tokenizer(ParamData);
+    Tokenizer(std::filesystem::path);
 
     std::vector<Token> get_token_list();
   private:
