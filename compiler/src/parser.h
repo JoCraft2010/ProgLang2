@@ -143,7 +143,7 @@ namespace pl {
     std::shared_ptr<PTEVal> value;
   };
 
-  // Class for return statements
+  // Class for local stack-assigned variables
   class PTELocalVarDecl : public PTEBase {
   public:
     PTELocalVarDecl(PTEBase*, std::string, std::string, int);
