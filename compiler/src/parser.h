@@ -81,7 +81,7 @@ namespace pl {
     using super = PTEBase;
   };
 
-  // Class for int literals
+  // Class for function calls
   class PTEFuncCall : public PTEVal {
   public:
     PTEFuncCall(PTEBase*, std::string);
