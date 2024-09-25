@@ -177,6 +177,20 @@ namespace pl {
     std::optional<std::shared_ptr<PTEVal>> value;
   };
 
+  // Class variable value assignments
+  class PTEVarAssign : public PTEBase {
+  public:
+    PTEVarAssign(PTEBase*, std::string);
+    std::vector<Token> parse(std::vector<Token>) override;
+    void debug_tree(int) override;
+    void build_llvm(LlvmModel&) override;
+  private:
+    using super = PTEBase;
+
+    std::string name;
+    std::shared_ptr<PTEVal> value;
+  };
+
   // Class for parsing the preprocessed tokens
   class Parser {
   public:

@@ -71,6 +71,13 @@ std::vector<pl::Token> pl::PTEFunc::parse(std::vector<Token> token_list) {
       PTELocalVarDecl child(this, n, t, a);
       token_list = child.parse(token_list);
       elements.push_back(std::make_shared<PTELocalVarDecl>(child));
+    } else if (token_list.at(0).is_identifier() && token_list.at(1).is_eq()) {
+      std::string n = token_list.at(0).data.at(0);
+      token_list.erase(token_list.begin(), token_list.begin() + 2);
+
+      PTEVarAssign child(this, n);
+      token_list = child.parse(token_list);
+      elements.push_back(std::make_shared<PTEVarAssign>(child));
     } else {
       Token first = token_list.at(0);
       std::shared_ptr<PTEVal> child = PTEVal::eval(token_list, this);
@@ -399,6 +406,27 @@ void pl::PTELocalVarDecl::build_llvm(LlvmModel& model) {
     return;
   }
   func.contents.push_back("store " + type + " " + value.value() -> obtain_access(model) + ", " + type + "* " + mem);
+}
+
+pl::PTEVarAssign::PTEVarAssign(PTEBase* p, std::string n) : super(p), name(n) {}
+
+std::vector<pl::Token> pl::PTEVarAssign::parse(std::vector<Token> token_list) {
+  value = PTEVal::eval(token_list, this);
+  return token_list;
+}
+
+void pl::PTEVarAssign::debug_tree(int level) {
+  for (int i = 0; i < level; i++) {
+    debug(" ");
+  }
+  debug("Variable assignment: " + name + "\n");
+  value -> debug_tree(level + 1);
+}
+
+void pl::PTEVarAssign::build_llvm(LlvmModel& model) {
+  LMPublicFunc& func = model.get_last_registered_public_func();
+  std::string t = func.get_variable_type(name);
+  func.contents.push_back("store " + t + " " + value -> obtain_access(model) + ", " + t + "* " + func.get_mem_addr_ptr(name));
 }
 
 pl::Parser::Parser(Preprocessor preprocessor) : root(nullptr) {

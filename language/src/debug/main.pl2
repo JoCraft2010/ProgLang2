@@ -1,7 +1,8 @@
 $include "libfile.pl2"
 
 int main() {
-  int a = 42;
+  int a;
+  a = 42;
   printf("Here's a word: %s\nAnd here's a number: %d\n", "yay", a);
   printf("Press enter to continue...\n");
   getchar();
