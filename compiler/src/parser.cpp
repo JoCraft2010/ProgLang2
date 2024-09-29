@@ -163,21 +163,25 @@ std::shared_ptr<pl::PTEVal> pl::PTEVal::eval(std::vector<Token>& token_list, PTE
     buf.push_back(token_list.front());
     token_list.erase(token_list.begin());
   }
-  if (buf.size() == 1 && buf.at(0).is_int_lit()) {
+  return _eval(buf, parent);
+}
+
+std::shared_ptr<pl::PTEVal> pl::PTEVal::_eval(std::vector<Token>& token_list, PTEBase* parent) {
+  if (token_list.size() == 1 && token_list.at(0).is_int_lit()) {
     PTEIntLit child(parent);
-    child.parse(buf);
+    child.parse(token_list);
     return std::make_shared<PTEIntLit>(child);
-  } else if (buf.size() == 1 && buf.at(0).is_str_lit()) {
+  } else if (token_list.size() == 1 && token_list.at(0).is_str_lit()) {
     PTEStrLit child(parent);
-    child.parse(buf);
+    child.parse(token_list);
     return std::make_shared<PTEStrLit>(child);
-  } else if (buf.size() == 1 && buf.at(0).is_identifier()) {
-    PTEVarVal child(parent, buf.at(0).data.at(0));
-    child.parse(buf);
+  } else if (token_list.size() == 1 && token_list.at(0).is_identifier()) {
+    PTEVarVal child(parent, token_list.at(0).data.at(0));
+    child.parse(token_list);
     return std::make_shared<PTEVarVal>(child);
-  } else if (buf.size() >= 3 && buf.at(0).is_identifier() && buf.at(1).is_br_open()) {
-    PTEFuncCall child(parent, buf.at(0).data.at(0));
-    child.parse(buf);
+  } else if (token_list.size() >= 3 && token_list.at(0).is_identifier() && token_list.at(1).is_br_open()) {
+    PTEFuncCall child(parent, token_list.at(0).data.at(0));
+    child.parse(token_list);
     return std::make_shared<PTEFuncCall>(child);
   } else {
     return nullptr;

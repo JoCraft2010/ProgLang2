@@ -78,6 +78,8 @@ namespace pl {
 
     static std::shared_ptr<PTEVal> eval(std::vector<Token>&, PTEBase*);
   private:
+    static std::shared_ptr<PTEVal> _eval(std::vector<Token>&, PTEBase*);
+
     using super = PTEBase;
   };
 
