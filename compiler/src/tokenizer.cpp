@@ -3,10 +3,16 @@
 pl::Token pl::Token::from(std::string s, size_t l, size_t c) {
   if (s == "return") {
     return Token{ TokenType::RETURN, {}, l, c };
-  } if (s == "char") {
+  } if (s == "bool") {
+    return Token{ TokenType::I1_T, {}, l, c };
+  }  if (s == "char") {
     return Token{ TokenType::I8_T, {}, l, c };
   } if (s == "int") {
     return Token{ TokenType::I32_T, {}, l, c };
+  } if (s == "true") {
+    return Token{ TokenType::INT_LIT, { "1" }, l, c };
+  } if (s == "false") {
+    return Token{ TokenType::INT_LIT, { "0" }, l, c };
   } if (std::string("1234567890").find(s.at(0)) != std::string::npos) {
     return Token{ TokenType::INT_LIT, { s }, l, c };
   }
@@ -68,7 +74,7 @@ bool pl::Token::is_return() { return token_type == RETURN; }
 bool pl::Token::is_literal() { return token_type == INT_LIT || token_type == STR_LIT; }
 bool pl::Token::is_int_lit() { return token_type == INT_LIT; }
 bool pl::Token::is_str_lit() { return token_type == STR_LIT; }
-bool pl::Token::is_type() { return token_type == I8_T || token_type == I32_T; }
+bool pl::Token::is_type() { return token_type == I1_T || token_type == I8_T || token_type == I32_T; }
 
 int pl::Token::as_operator_priority() {
   switch (token_type) {
@@ -87,6 +93,8 @@ std::string pl::Token::as_type() {
   switch (token_type) {
     case TILDE:
       return "...";
+    case I1_T:
+      return "i1";
     case I8_T:
       return "i8";
     case I32_T:

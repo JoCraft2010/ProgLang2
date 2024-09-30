@@ -33,6 +33,7 @@ namespace pl {
     INT_LIT, // Data: Value
     STR_LIT, // Data: Value
     // Primitive types
+    I1_T,
     I8_T,
     I32_T
   };
@@ -56,6 +57,7 @@ namespace pl {
     "return",
     "int literal",
     "string literal",
+    "bool",
     "char",
     "int"
   };
