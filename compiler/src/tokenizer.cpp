@@ -100,7 +100,8 @@ std::string pl::Token::as_type() {
     case I32_T:
       return "i32";
     default:
-      return "invalid";
+      error(to_string_no_data() + " is not a type.");
+      return "";
   }
 }
 
