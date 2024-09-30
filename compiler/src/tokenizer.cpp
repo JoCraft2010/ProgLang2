@@ -35,6 +35,14 @@ pl::Token pl::Token::from(char ch, size_t l, size_t c) {
       return Token{ TokenType::AT, {}, l, c };
     case '~':
       return Token{ TokenType::TILDE, {}, l, c };
+    case '+':
+      return Token{ TokenType::PLUS, {}, l, c };
+    case '-':
+      return Token{ TokenType::MINUS, {}, l, c };
+    case '*':
+      return Token{ TokenType::ASTERISK, {}, l, c };
+    case '/':
+      return Token{ TokenType::SLASH, {}, l, c };
     default:
       return Token{ TokenType::IDENTIFIER, { std::to_string(ch) }, l, c };
   }
@@ -51,11 +59,29 @@ bool pl::Token::is_curl_open() { return token_type == CURL_OPEN; }
 bool pl::Token::is_curl_close() { return token_type == CURL_CLOSE; }
 bool pl::Token::is_at() { return token_type == AT; }
 bool pl::Token::is_tilde() { return token_type == TILDE; }
+bool pl::Token::is_operator() { return token_type == PLUS || token_type == MINUS || token_type == ASTERISK || token_type == SLASH; }
+bool pl::Token::is_plus() { return token_type == PLUS; }
+bool pl::Token::is_minus() { return token_type == MINUS; }
+bool pl::Token::is_asterisk() { return token_type == ASTERISK; }
+bool pl::Token::is_slash() { return token_type == SLASH; }
 bool pl::Token::is_return() { return token_type == RETURN; }
 bool pl::Token::is_literal() { return token_type == INT_LIT || token_type == STR_LIT; }
 bool pl::Token::is_int_lit() { return token_type == INT_LIT; }
 bool pl::Token::is_str_lit() { return token_type == STR_LIT; }
 bool pl::Token::is_type() { return token_type == I8_T || token_type == I32_T; }
+
+int pl::Token::as_operator_priority() {
+  switch (token_type) {
+    case PLUS:
+    case MINUS:
+      return 0;
+    case ASTERISK:
+    case SLASH:
+      return 1;
+    default:
+      return -1;
+  }
+}
 
 std::string pl::Token::as_type() {
   switch (token_type) {
@@ -122,7 +148,7 @@ pl::Tokenizer::Tokenizer(std::filesystem::path ifpath) {
     }
 
     // Check for terminating characters
-    if (std::string(" \t\n$;,=(){}@~").find(ch) != std::string::npos) {
+    if (std::string(" \t\n$;,=(){}@~+-*/").find(ch) != std::string::npos) {
       if (!buf.empty()) {
         if (ch == '\n') {
           token_list.push_back(Token::from(buf, line, character));
@@ -130,7 +156,7 @@ pl::Tokenizer::Tokenizer(std::filesystem::path ifpath) {
           token_list.push_back(Token::from(buf, line + 1, character));
         }
       }
-      if (std::string("$;,=(){}@~").find(ch) != std::string::npos) {
+      if (std::string("$;,=(){}@~+-*/").find(ch) != std::string::npos) {
         token_list.push_back(Token::from(ch, line, character));
       }
       buf = "";

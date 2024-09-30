@@ -78,9 +78,29 @@ namespace pl {
 
     static std::shared_ptr<PTEVal> eval(std::vector<Token>&, PTEBase*);
   private:
-    static std::shared_ptr<PTEVal> _eval(std::vector<Token>&, PTEBase*);
+    static std::shared_ptr<PTEVal> _evala(std::vector<std::vector<Token>>, std::vector<Token>, PTEBase*);
+    static std::shared_ptr<PTEVal> _evalb(std::vector<Token>&, PTEBase*);
 
     using super = PTEBase;
+  };
+
+  // Class for any calculation using an operator like +, -, * and /
+  class PTEOpCalc : public PTEVal {
+  public:
+    PTEOpCalc(PTEBase*, Token);
+    std::string obtain_access(LlvmModel&) override;
+    std::string obtain_preferred_type(LlvmModel&) override;
+    std::vector<Token> parse(std::vector<Token>) override;
+    void debug_tree(int) override;
+    void build_llvm(LlvmModel&) override;
+
+    void put_parsed(std::shared_ptr<PTEVal>, std::shared_ptr<PTEVal>);
+  private:
+    using super = PTEVal;
+
+    Token op;
+    std::shared_ptr<PTEVal> first;
+    std::shared_ptr<PTEVal> second;
   };
 
   // Class for function calls

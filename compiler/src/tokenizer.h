@@ -22,6 +22,11 @@ namespace pl {
     CURL_CLOSE,
     AT,
     TILDE,
+    // Operators
+    PLUS,
+    MINUS,
+    ASTERISK,
+    SLASH,
     // Keywords
     RETURN,
     // Literals
@@ -44,6 +49,10 @@ namespace pl {
     "closing curly bracket",
     "at",
     "tilde",
+    "plus",
+    "minus",
+    "asterisk",
+    "slash",
     "return",
     "int literal",
     "string literal",
@@ -74,6 +83,11 @@ namespace pl {
     bool is_curl_close();
     bool is_at();
     bool is_tilde();
+    bool is_operator();
+    bool is_plus();
+    bool is_minus();
+    bool is_asterisk();
+    bool is_slash();
     bool is_return();
     bool is_literal();
     bool is_int_lit();
@@ -81,6 +95,7 @@ namespace pl {
     bool is_type();
 
     // Conversion functions
+    int as_operator_priority();
     std::string as_type();
     int as_alignment();
 

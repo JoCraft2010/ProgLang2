@@ -158,15 +158,47 @@ void pl::PTEFuncDef::build_llvm(LlvmModel& model) {
 pl::PTEVal::PTEVal(PTEBase* p) : super(p) {}
 
 std::shared_ptr<pl::PTEVal> pl::PTEVal::eval(std::vector<Token>& token_list, PTEBase* parent) {
-  std::vector<Token> buf;
+  std::vector<std::vector<Token>> buf{ { } };
+  std::vector<Token> operators;
+  size_t bracket_index = 0;
   while (!token_list.at(0).is_semicolon()) {
-    buf.push_back(token_list.front());
+    if (bracket_index == 0 && token_list.at(0).is_operator()) {
+      buf.push_back({ });
+      operators.push_back(token_list.at(0));
+      token_list.erase(token_list.begin());
+      continue;
+    }
+    if (token_list.at(0).is_br_open()) { bracket_index++; }
+    if (token_list.at(0).is_br_close()) { bracket_index--; }
+    buf.back().push_back(token_list.front());
     token_list.erase(token_list.begin());
   }
-  return _eval(buf, parent);
+  return _evala(buf, operators, parent);
 }
 
-std::shared_ptr<pl::PTEVal> pl::PTEVal::_eval(std::vector<Token>& token_list, PTEBase* parent) {
+std::shared_ptr<pl::PTEVal> pl::PTEVal::_evala(std::vector<std::vector<Token>> token_list, std::vector<Token> operators, PTEBase* parent) {
+  if (token_list.size() - 1 != operators.size()) {
+    error("Compiler bug: (" + std::string{ __FILE__ } + ":" + std::to_string(__LINE__) + ")", token_list.at(0).at(0).line, token_list.at(0).at(0).character);
+  }
+  if (token_list.size() == 1) {
+    return _evalb(token_list.at(0), parent);
+  }
+  Token lowest = operators.at(0);
+  size_t lowest_index = 0;
+  for (size_t i = 1; i < operators.size(); i++) {
+    if (operators.at(i).as_operator_priority() < lowest.as_operator_priority()) {
+      lowest = operators.at(i);
+      lowest_index = i;
+    }
+  }
+  PTEOpCalc child(parent, lowest);
+  // So basically this line slices the token_list and the operators vectors at the lowest_index position and calls _evala individually again for both sides of the slice, from which a PTEOpCalc instance is generated.
+  // This might have like 10 possible errors caused by overflow and stuff like that
+  child.put_parsed(_evala(std::vector<std::vector<Token>>(token_list.begin(), token_list.begin() + static_cast<ptrdiff_t>(lowest_index) + 1), std::vector<Token>(operators.begin(), operators.begin() + static_cast<ptrdiff_t>(lowest_index)), parent), _evala(std::vector<std::vector<Token>>(token_list.begin() + static_cast<ptrdiff_t>(lowest_index) + 1, token_list.end()), std::vector<Token>(operators.begin() + static_cast<ptrdiff_t>(lowest_index) + 1, operators.end()), parent));
+  return std::make_shared<PTEOpCalc>(child);
+}
+
+std::shared_ptr<pl::PTEVal> pl::PTEVal::_evalb(std::vector<Token>& token_list, PTEBase* parent) {
   if (token_list.size() == 1 && token_list.at(0).is_int_lit()) {
     PTEIntLit child(parent);
     child.parse(token_list);
@@ -186,6 +218,54 @@ std::shared_ptr<pl::PTEVal> pl::PTEVal::_eval(std::vector<Token>& token_list, PT
   } else {
     return nullptr;
   }
+}
+
+pl::PTEOpCalc::PTEOpCalc(PTEBase* p, Token o) : super(p), op(o) {}
+
+std::string pl::PTEOpCalc::obtain_access(LlvmModel& model) {
+  build_llvm(model);
+  return "%" + std::to_string(model.get_last_registered_public_func().cssa - 1);
+}
+
+std::string pl::PTEOpCalc::obtain_preferred_type(LlvmModel& model) {
+  return first -> obtain_preferred_type(model);
+}
+
+std::vector<pl::Token> pl::PTEOpCalc::parse(std::vector<Token> token_list) {
+  return token_list;
+}
+
+void pl::PTEOpCalc::debug_tree(int level) {
+  for (int i = 0; i < level; i++) {
+    debug(" ");
+  }
+  debug("Calculation: " + op.to_string_no_data() + "\n");
+  first -> debug_tree(level + 1);
+  second -> debug_tree(level + 1);
+}
+
+void pl::PTEOpCalc::build_llvm(LlvmModel& model) {
+  LMPublicFunc& func = model.get_last_registered_public_func();
+  if (op.is_plus()) {
+    func.contents.push_back("%" + std::to_string(func.cssa++) + " = add " + first -> obtain_preferred_type(model) + " " + first -> obtain_access(model) + ", " + second -> obtain_access(model));
+    return;
+  } else if (op.is_minus()) {
+    func.contents.push_back("%" + std::to_string(func.cssa++) + " = sub " + first -> obtain_preferred_type(model) + " " + first -> obtain_access(model) + ", " + second -> obtain_access(model));
+    return;
+  } else if (op.is_asterisk()) {
+    func.contents.push_back("%" + std::to_string(func.cssa++) + " = mul " + first -> obtain_preferred_type(model) + " " + first -> obtain_access(model) + ", " + second -> obtain_access(model));
+    return;
+  } else if (op.is_slash()) {
+    error("Division isn't implemented yet because of signed and unsigned numbers.");
+    return;
+  } else {
+    error("Compiler bug: (" + std::string{ __FILE__ } + ":" + std::to_string(__LINE__) + ")");
+  }
+}
+
+void pl::PTEOpCalc::put_parsed(std::shared_ptr<PTEVal> f, std::shared_ptr<PTEVal> s) {
+  first = f;
+  second = s;
 }
 
 pl::PTEFuncCall::PTEFuncCall(PTEBase* p, std::string n) : super(p), name(n) {}
