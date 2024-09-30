@@ -2,7 +2,7 @@ CXX := g++
 CC := gcc
 LLC := llc
 
-CXXFLAGS ?= -Wextra -Wshadow -Wconversion -Wsign-conversion -Wunreachable-code -pedantic -fomit-frame-pointer -fstack-protector-strong -fno-strict-aliasing -fno-exceptions -fstack-clash-protection -fno-plt -D_FORTIFY_SOURCE=2 -O3 -std=c++17 -pipe -march=native
+CXXFLAGS ?= -Wextra -Wshadow -Wconversion -Wsign-conversion -Wunreachable-code -pedantic -fomit-frame-pointer -fstack-protector-strong -fno-strict-aliasing -fno-exceptions -fstack-clash-protection -fno-plt -D_FORTIFY_SOURCE=2 -O3 -std=c++20 -pipe -march=native
 CCFLAGS ?=
 LLCFLAGS ?= -relocation-model=dynamic-no-pic
 

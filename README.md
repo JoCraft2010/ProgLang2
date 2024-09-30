@@ -11,7 +11,7 @@ To use ProgLang2 on your Computer you need to install the required dependencies.
 ### Dependencies
 | Dependency | Version  | Description               | Notes                                |
 |------------|----------|---------------------------|--------------------------------------|
-| GCC/G++    | >= 8.1   | GNU Compiler Collection   | May be preinstalled on many machines |
+| GCC/G++    | >= 10.0  | GNU Compiler Collection   | May be preinstalled on many machines |
 | LLVM (llc) | ~= 18.0  | Low Level Virtual Machine |                                      |
 | GIT        | >= 1.6.6 | Version Control System    | Optional; recommended for cloning    |
 
