@@ -145,6 +145,15 @@ pl::Tokenizer::Tokenizer(std::filesystem::path ifpath) {
     }
     character++;
 
+    // Check for \ ... comments
+    if (buf.size() > 0 && buf.at(0) == '\\') {
+      buf += ch;
+      if (ch == '\n') {
+        buf = "";
+      }
+      continue;
+    }
+
     // Check for string literals
     if (buf.size() > 0 && buf.at(0) == '"') {
       if (ch == '"') {
