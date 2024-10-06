@@ -33,3 +33,17 @@ int main() {
   return 0;
 }
 ```
+
+## 2.4 Function Calls
+A function is called by writing it's name followed by brackets containing the arguments.
+```
+test(); \ test is executed
+other(2, 4); \ other is executed with arguments 2 and 4
+```
+
+## 2.5 External Functions
+An external function is declared by an @ followed by the return type of the function, the function's name and brackets containing the list of function argument types. Function argument types can either be a primitive type, a pointer to a primitive type indicated by a primitive type followed by an @ or an ellipse (~).
+```
+@ int getchar();
+@ int printf(char @, ~);
+```
